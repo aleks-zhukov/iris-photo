@@ -1,0 +1,128 @@
+---
+import site from '../data/site.json';
+
+const accessKey = import.meta.env.PUBLIC_WEB3FORMS_ACCESS_KEY ?? '';
+---
+
+<section id="zapis" class="scroll-mt-24 border-t border-line bg-blush/40 py-20 md:py-28">
+	<div class="mx-auto max-w-xl px-5">
+		<h2 class="font-display text-3xl font-semibold tracking-tight text-ink md:text-4xl">Запись на съёмку</h2>
+		<p class="mt-3 text-ink-muted">Напишите, какая съёмка вам нужна и удобные даты — отвечу в Telegram или на почту.</p>
+
+		{
+			accessKey ? (
+				<form
+					id="booking-form"
+					class="mt-10 space-y-5"
+					name="booking"
+					aria-label="Форма записи на съёмку"
+				>
+					<input type="hidden" name="access_key" value={accessKey} />
+					<input type="hidden" name="subject" value={`Заявка — ${site.siteTitle}`} />
+					<input type="checkbox" name="botcheck" class="hidden" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+					<div>
+						<label for="name" class="mb-1.5 block text-sm font-medium text-ink">
+							Имя
+						</label>
+						<input
+							id="name"
+							name="name"
+							type="text"
+							required
+							autocomplete="name"
+							class="w-full rounded-xl border border-line bg-cream/80 px-4 py-3 text-ink shadow-sm outline-none transition focus:border-sand focus:ring-2 focus:ring-peach/50"
+						/>
+					</div>
+					<div>
+						<label for="email" class="mb-1.5 block text-sm font-medium text-ink">
+							Email
+						</label>
+						<input
+							id="email"
+							name="email"
+							type="email"
+							required
+							autocomplete="email"
+							class="w-full rounded-xl border border-line bg-cream/80 px-4 py-3 text-ink shadow-sm outline-none transition focus:border-sand focus:ring-2 focus:ring-peach/50"
+						/>
+					</div>
+					<div>
+						<label for="phone" class="mb-1.5 block text-sm font-medium text-ink">
+							Телефон или Telegram
+						</label>
+						<input
+							id="phone"
+							name="phone"
+							type="text"
+							autocomplete="tel"
+							class="w-full rounded-xl border border-line bg-cream/80 px-4 py-3 text-ink shadow-sm outline-none transition focus:border-sand focus:ring-2 focus:ring-peach/50"
+						/>
+					</div>
+					<div>
+						<label for="message" class="mb-1.5 block text-sm font-medium text-ink">
+							Комментарий
+						</label>
+						<textarea
+							id="message"
+							name="message"
+							rows={4}
+							required
+							class="w-full resize-y rounded-xl border border-line bg-cream/80 px-4 py-3 text-ink shadow-sm outline-none transition focus:border-sand focus:ring-2 focus:ring-peach/50"
+						/>
+					</div>
+					<button
+						type="submit"
+						class="w-full rounded-full bg-ink px-8 py-3.5 text-sm font-semibold tracking-wide text-cream transition hover:bg-ink/90 disabled:opacity-60"
+					>
+						Отправить
+					</button>
+					<p id="form-status" class="hidden text-sm" role="status" />
+				</form>
+			) : (
+				<p class="mt-8 rounded-xl border border-dashed border-sand bg-cream/60 p-6 text-sm text-ink-muted">
+					Чтобы форма работала, добавьте в <code class="rounded bg-blush px-1">.env</code> переменную{' '}
+					<code class="rounded bg-blush px-1">PUBLIC_WEB3FORMS_ACCESS_KEY</code> с ключом с{' '}
+					<a href="https://web3forms.com" class="text-ink underline underline-offset-2" target="_blank" rel="noopener noreferrer">
+						web3forms.com
+					</a>
+					, затем пересоберите сайт.
+				</p>
+			)
+		}
+	</div>
+</section>
+
+{
+	accessKey && (
+		<script>
+			const form = document.getElementById('booking-form');
+			const status = document.getElementById('form-status');
+			form?.addEventListener('submit', async (e) => {
+				e.preventDefault();
+				const btn = form.querySelector('button[type="submit"]');
+				btn?.setAttribute('disabled', 'true');
+				status?.classList.add('hidden');
+				try {
+					const fd = new FormData(form);
+					const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: fd });
+					const data = await res.json();
+					if (data.success) {
+						status!.textContent = 'Спасибо! Я свяжусь с вами в ближайшее время.';
+						status!.className = 'text-sm text-ink';
+						status!.classList.remove('hidden');
+						form.reset();
+					} else {
+						throw new Error(data.message || 'Ошибка отправки');
+					}
+				} catch {
+					status!.textContent = 'Не удалось отправить. Напишите мне в Telegram или на почту.';
+					status!.className = 'text-sm text-red-800';
+					status!.classList.remove('hidden');
+				} finally {
+					btn?.removeAttribute('disabled');
+				}
+			});
+		</script>
+	)
+}

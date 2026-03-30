@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+@theme {
+	--font-display: "Cormorant Garamond", "Times New Roman", serif;
+	--font-body: "Nunito Sans", system-ui, sans-serif;
+
+	--color-cream: #faf6f1;
+	--color-cream-deep: #f3ebe3;
+	--color-blush: #f5e8e0;
+	--color-peach: #edd5c4;
+	--color-sand: #d4b896;
+	--color-ink: #3d342e;
+	--color-ink-muted: #6b5e54;
+	--color-line: #e8ddd4;
+}
+
+@layer base {
+	html {
+		scroll-behavior: smooth;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		html {
+			scroll-behavior: auto;
+		}
+	}
+
+	body {
+		@apply bg-cream text-ink font-body antialiased;
+	}
+
+	::selection {
+		@apply bg-peach text-ink;
+	}
+}

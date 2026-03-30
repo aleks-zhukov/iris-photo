@@ -1,0 +1,156 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import BookingForm from '../components/BookingForm.astro';
+import site from '../data/site.json';
+
+const portfolioRaw = await getCollection('portfolio');
+const portfolio = portfolioRaw.sort((a, b) => a.data.order - b.data.order);
+
+const canonicalBase = import.meta.env.PUBLIC_SITE_URL?.replace(/\/$/, '') ?? 'https://example.com';
+const ogImage = portfolio[0]?.data.image
+	? `${canonicalBase}${portfolio[0].data.image}`
+	: `${canonicalBase}/favicon.svg`;
+---
+
+<BaseLayout title={`${site.photographerName} — ${site.siteTitle}`} description={site.tagline} image={ogImage}>
+	<header class="border-b border-line/80 bg-cream/90 backdrop-blur-sm">
+		<div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-5 py-5 md:py-6">
+			<a href="#" class="font-display text-2xl tracking-tight text-ink md:text-3xl">{site.siteTitle}</a>
+			<nav class="flex flex-wrap items-center gap-6 text-sm text-ink-muted" aria-label="Основная навигация">
+				<a href="#portfolio" class="transition hover:text-ink">Портфолио</a>
+				<a href="#about" class="transition hover:text-ink">О себе</a>
+				<a href="#zapis" class="transition hover:text-ink">Запись</a>
+				<a
+					href={site.instagramUrl}
+					class="transition hover:text-ink"
+					target="_blank"
+					rel="noopener noreferrer"
+				>
+					Instagram
+				</a>
+				<a href={site.telegramUrl} class="transition hover:text-ink" target="_blank" rel="noopener noreferrer">
+					Telegram
+				</a>
+			</nav>
+		</div>
+	</header>
+
+	<main>
+		<section class="relative overflow-hidden bg-gradient-to-b from-blush/50 via-cream to-cream px-5 pb-20 pt-16 md:pb-28 md:pt-24" aria-labelledby="hero-heading">
+			<div class="pointer-events-none absolute -right-24 top-0 h-72 w-72 rounded-full bg-peach/35 blur-3xl md:h-96 md:w-96" />
+			<div class="pointer-events-none absolute -left-16 bottom-0 h-56 w-56 rounded-full bg-blush/60 blur-3xl" />
+			<div class="relative mx-auto max-w-3xl text-center">
+				<p class="font-body text-sm font-medium uppercase tracking-[0.2em] text-ink-muted">{site.siteTitle}</p>
+				<h1 id="hero-heading" class="mt-4 font-display text-4xl font-semibold leading-tight text-ink md:text-6xl md:leading-tight">
+					{site.photographerName}
+				</h1>
+				<p class="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-ink-muted md:text-xl">{site.tagline}</p>
+				<div class="mt-10 flex flex-wrap items-center justify-center gap-4">
+					<a
+						href="#zapis"
+						class="inline-flex rounded-full bg-ink px-8 py-3.5 text-sm font-semibold text-cream transition hover:bg-ink/90"
+					>
+						Записаться
+					</a>
+					<a
+						href={site.telegramUrl}
+						class="inline-flex rounded-full border border-line bg-cream/60 px-8 py-3.5 text-sm font-semibold text-ink transition hover:border-sand"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						Telegram
+					</a>
+				</div>
+			</div>
+		</section>
+
+		<section id="portfolio" class="scroll-mt-24 bg-cream-deep/50 py-20 md:py-28" aria-labelledby="portfolio-heading">
+			<div class="mx-auto max-w-6xl px-5">
+				<h2 id="portfolio-heading" class="font-display text-3xl font-semibold text-ink md:text-4xl">Портфолио</h2>
+				<p class="mt-2 max-w-xl text-ink-muted">Работы можно менять и добавлять в админке — без правок кода.</p>
+				<ul class="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+					{
+						portfolio.map((item) => (
+							<li class="group">
+								<figure class="overflow-hidden rounded-2xl bg-blush shadow-sm ring-1 ring-line/60 transition group-hover:shadow-md">
+									<div class="aspect-[4/5] overflow-hidden">
+										<img
+											src={item.data.image}
+											alt={item.data.alt ?? item.data.title}
+											width={800}
+											height={1000}
+											loading="lazy"
+											decoding="async"
+											class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]"
+										/>
+									</div>
+									<figcaption class="px-5 py-4">
+										<p class="font-display text-xl text-ink">{item.data.title}</p>
+										{item.data.category && <p class="mt-1 text-sm text-ink-muted">{item.data.category}</p>}
+									</figcaption>
+								</figure>
+							</li>
+						))
+					}
+				</ul>
+			</div>
+		</section>
+
+		<section id="about" class="scroll-mt-24 border-t border-line bg-cream py-20 md:py-28" aria-labelledby="about-heading">
+			<div class="mx-auto grid max-w-6xl gap-12 px-5 md:grid-cols-2 md:items-center">
+				<div>
+					<h2 id="about-heading" class="font-display text-3xl font-semibold text-ink md:text-4xl">О себе</h2>
+					<p class="mt-6 max-w-lg leading-relaxed text-ink-muted">{site.about}</p>
+					<dl class="mt-8 space-y-2 text-sm text-ink-muted">
+						<div class="flex gap-2">
+							<dt class="font-medium text-ink">Почта</dt>
+							<dd>
+								<a href={`mailto:${site.email}`} class="underline decoration-line underline-offset-4 hover:text-ink">
+									{site.email}
+								</a>
+							</dd>
+						</div>
+						<div class="flex gap-2">
+							<dt class="font-medium text-ink">Телефон</dt>
+							<dd>
+								<a href={`tel:${site.phone.replace(/\s/g, '')}`} class="hover:text-ink">{site.phone}</a>
+							</dd>
+						</div>
+					</dl>
+				</div>
+				<div class="rounded-3xl border border-line bg-gradient-to-br from-blush to-peach/40 p-10 text-center shadow-inner md:p-14">
+					<p class="font-display text-2xl text-ink md:text-3xl">Связь</p>
+					<p class="mt-3 text-sm text-ink-muted">Удобнее всего — в мессенджерах</p>
+					<div class="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+						<a
+							href={site.instagramUrl}
+							class="inline-flex justify-center rounded-full bg-cream px-6 py-3 text-sm font-semibold text-ink shadow-sm ring-1 ring-line transition hover:ring-sand"
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							Instagram
+						</a>
+						<a
+							href={site.telegramUrl}
+							class="inline-flex justify-center rounded-full bg-ink px-6 py-3 text-sm font-semibold text-cream transition hover:bg-ink/90"
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							Telegram
+						</a>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<BookingForm />
+	</main>
+
+	<footer class="border-t border-line bg-cream-deep/40 py-10 text-center text-sm text-ink-muted">
+		<p>© {new Date().getFullYear()} {site.siteTitle}. Москва.</p>
+		<p class="mt-2">
+			<a href="/admin/" class="underline decoration-line underline-offset-4 hover:text-ink">Админка</a>
+		</p>
+	</footer>
+</BaseLayout>

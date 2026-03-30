@@ -1,0 +1,61 @@
+---
+import '../styles/global.css';
+import site from '../data/site.json';
+
+interface Props {
+	title?: string;
+	description?: string;
+	image?: string;
+}
+
+const canonicalBase = import.meta.env.PUBLIC_SITE_URL?.replace(/\/$/, '') ?? 'https://example.com';
+const { title = site.siteTitle, description = site.tagline, image = `${canonicalBase}/favicon.svg` } = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, canonicalBase).href;
+
+const jsonLd = {
+	'@context': 'https://schema.org',
+	'@type': 'Person',
+	name: site.photographerName,
+	url: canonicalBase,
+	image: image.startsWith('http') ? image : `${canonicalBase}${image}`,
+	description: site.tagline,
+	sameAs: [site.instagramUrl, site.telegramUrl].filter(Boolean),
+	areaServed: { '@type': 'City', name: 'Москва' },
+};
+---
+
+<!doctype html>
+<html lang="ru">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		<link rel="canonical" href={canonicalURL} />
+
+		<meta property="og:type" content="website" />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={canonicalURL} />
+		<meta property="og:locale" content="ru_RU" />
+		<meta property="og:image" content={image.startsWith('http') ? image : `${canonicalBase}${image}`} />
+
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Nunito+Sans:ital,opsz,wght@0,6..12,300;0,6..12,400;0,6..12,600;1,6..12,400&display=swap"
+			rel="stylesheet"
+		/>
+
+		<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+	</head>
+	<body class="min-h-screen">
+		<slot />
+	</body>
+</html>
